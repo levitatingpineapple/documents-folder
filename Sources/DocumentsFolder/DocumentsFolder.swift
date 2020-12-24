@@ -2,12 +2,12 @@ import Foundation
 import Combine
 
 @available(iOS 13, *)
-class DocumentsFolder<T>: ObservableObject where T: Codable, T: CustomStringConvertible {
+public class DocumentsFolder<T>: ObservableObject where T: Codable, T: CustomStringConvertible {
 	
 	//MARK: Interface
-	@Published private(set) var objects = Array<T>()
+	@Published public private(set) var objects = Array<T>()
 	
-	init(fileExtension: String) {
+	public init(fileExtension: String) {
 		guard let documents = FM.urls(
 			for: .documentDirectory,
 			in: .userDomainMask
@@ -24,27 +24,27 @@ class DocumentsFolder<T>: ObservableObject where T: Codable, T: CustomStringConv
 		load()
 	}
 	
-	func importFile(from url: URL) throws {
+	public func importFile(from url: URL) throws {
 		let localURL = documents.appendingPathComponent(url.lastPathComponent)
 		if url.path.contains(localURL.path) { return }
 		if FM.fileExists(atPath: localURL.path) { try FM.removeItem(at: localURL) }
 		try FM.copyItem(at: url, to: localURL)
 	}
 	
-	func downloadFile(from url: URL, fileName: String) throws {
+	public func downloadFile(from url: URL, fileName: String) throws {
 		URLSession.shared.dataTask(with: url) { data, response, error in
 			guard let data = data else { return }
 			try? data.write(to: self.documents.appendingPathComponent(fileName))
 		}.resume()
 	}
 	
-	func save(_ object: T) throws {
+	public func save(_ object: T) throws {
 		let data = try JSONEncoder().encode(object)
 		try data.write(to: documents.appendingPathComponent(object.description + "." + fileExtension))
 		load()
 	}
 	
-	func delete(at offsets: IndexSet) {
+	public func delete(at offsets: IndexSet) {
 		for index in offsets {
 			let object = objects[index]
 			try? FM.removeItem(at: documents.appendingPathComponent(object.description + "." + fileExtension))
@@ -52,12 +52,12 @@ class DocumentsFolder<T>: ObservableObject where T: Codable, T: CustomStringConv
 	}
 	
 	//MARK: Implementation
-	private let FM = FileManager.default
-	private let source: DispatchSourceFileSystemObject
-	private let documents: URL
-	private let fileExtension: String
+	let FM = FileManager.default
+	let source: DispatchSourceFileSystemObject
+	let documents: URL
+	let fileExtension: String
 	
-	private func load() {
+	func load() {
 		guard let contents = try? FM.contentsOfDirectory(
 			at: documents,
 			includingPropertiesForKeys: nil,
