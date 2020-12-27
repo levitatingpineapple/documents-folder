@@ -21,7 +21,6 @@ public class DocumentsFolder<T>: ObservableObject where T: Codable, T: CustomStr
 			queue: DispatchQueue.global(qos: .utility))
 		source.setEventHandler { self.load() }
 		source.resume()
-		load()
 	}
 	
 	public func importFile(from url: URL) throws {
