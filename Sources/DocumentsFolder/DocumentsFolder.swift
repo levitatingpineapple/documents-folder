@@ -21,6 +21,7 @@ public class DocumentsFolder<T>: ObservableObject where T: Codable, T: CustomStr
 			queue: DispatchQueue.global(qos: .utility))
 		source.setEventHandler { self.load() }
 		source.resume()
+		load()
 	}
 	
 	public func importFile(from url: URL) throws {
@@ -39,15 +40,11 @@ public class DocumentsFolder<T>: ObservableObject where T: Codable, T: CustomStr
 	
 	public func save(_ object: T) throws {
 		let data = try JSONEncoder().encode(object)
-		try data.write(to: documents.appendingPathComponent(object.description + "." + fileExtension))
-		load()
+		try data.write(to: url(for: object))
 	}
 	
 	public func delete(at offsets: IndexSet) {
-		for index in offsets {
-			let object = objects[index]
-			try? FM.removeItem(at: documents.appendingPathComponent(object.description + "." + fileExtension))
-		}
+		offsets.forEach { try? FM.removeItem(at: url(for: objects[$0])) }
 	}
 	
 	//MARK: Implementation
@@ -56,7 +53,11 @@ public class DocumentsFolder<T>: ObservableObject where T: Codable, T: CustomStr
 	let documents: URL
 	let fileExtension: String
 	
-	func load() {
+	private func url(for object: T) -> URL {
+		documents.appendingPathComponent(object.description + fileExtension)
+	}
+	
+	private func load() {
 		guard let contents = try? FM.contentsOfDirectory(
 			at: documents,
 			includingPropertiesForKeys: nil,
@@ -64,7 +65,7 @@ public class DocumentsFolder<T>: ObservableObject where T: Codable, T: CustomStr
 		) else { return }
 		DispatchQueue.main.async {
 			self.objects = contents
-				.filter { $0.lastPathComponent.hasSuffix("." + self.fileExtension) }
+				.filter { $0.lastPathComponent.hasSuffix(self.fileExtension) }
 				.compactMap {
 					guard let data = FileManager.default.contents(atPath: $0.path) else { return nil }
 					return try? JSONDecoder().decode(T.self, from: data)
