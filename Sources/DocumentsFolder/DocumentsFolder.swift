@@ -45,7 +45,11 @@ public class DocumentsFolder<T>: ObservableObject where T: Codable, T: CustomStr
 	}
 	
 	public func delete(at offsets: IndexSet) {
-		offsets.forEach { try? FM.removeItem(at: url(for: objects[$0])) }
+		offsets.forEach { delete(objects[$0]) }
+	}
+	
+	public func delete(_ object: T) {
+		try? FM.removeItem(at: url(for: object))
 	}
 	
 	public func object(_ name: String) -> T? {
