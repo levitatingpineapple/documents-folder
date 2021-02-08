@@ -3,16 +3,16 @@ import Combine
 
 @available(iOS 13, *)
 public class DocumentsFolder<T>: ObservableObject where T: Codable, T: CustomStringConvertible {
-
+	
 	@Published public private(set) var objects = Array<T>()
 	
-	public init(fileExtension: String) {
+	public init() {
 		guard let url = FM.urls(
 			for: .documentDirectory,
 			in: .userDomainMask
 		).first else { fatalError("Documents Folder Missing") }
 		self.url = url
-		self.fileExtension = fileExtension
+		self.fileExtension = "." + String(describing: T.self).lowercased()
 		self.decoder = JSONDecoder()
 		self.encoder = JSONEncoder()
 		encoder.outputFormatting = .prettyPrinted
