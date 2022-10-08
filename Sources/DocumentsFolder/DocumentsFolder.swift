@@ -1,7 +1,6 @@
 import Foundation
 import Combine
 
-@available(iOS 13, *)
 public class DocumentsFolder<T>: ObservableObject where T: Codable, T: CustomStringConvertible {
 	
 	@Published public private(set) var objects = Array<T>()
@@ -82,6 +81,5 @@ public class DocumentsFolder<T>: ObservableObject where T: Codable, T: CustomStr
 					.sorted { $0.description < $1.description }
 			}
 		}
-		
 	}
 }
